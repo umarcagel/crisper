@@ -61,7 +61,7 @@ import compress.joshattic.us.R
 import compress.joshattic.us.ui.screens.CompressionFailedScreen
 import compress.joshattic.us.ui.screens.CompressingScreen
 import compress.joshattic.us.ui.screens.ConfigScreen
-import compress.joshattic.us.ui.screens.EmptyScreen
+import compress.joshattic.us.ui.screens.LibraryScreen
 import compress.joshattic.us.ui.screens.ResultScreen
 import compress.joshattic.us.ui.screens.settings.AboutScreen
 import compress.joshattic.us.ui.screens.settings.DisplaySettingsScreen
@@ -385,10 +385,11 @@ fun CompressorApp(viewModel: CompressorViewModel) {
                                 label = "FlowContent"
                             ) { index ->
                                 when (index) {
-                                    0 -> EmptyScreen(
+                                    0 -> LibraryScreen(
                                         totalSaved = state.formattedTotalSaved,
                                         showStorageSaved = state.showStorageSaved,
-                                        onPick = {
+                                        onVideoSelected = { uri -> viewModel.updateSelectedUri(context, uri) },
+                                        onPickWithPicker = {
                                             when (state.videoPickerMode) {
                                                 VideoPickerMode.PHOTO_PICKER -> {
                                                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
