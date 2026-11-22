@@ -411,22 +411,7 @@ fun ResultScreen(
         ) {
             Text(stringResource(R.string.compress_another_video), fontWeight = FontWeight.Bold)
         }
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        TextButton(
-            onClick = {
-                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                uriHandler.openUri("https://buymeacoffee.com/joshatticus")
-            }
-        ) {
-             Text(
-                stringResource(R.string.buy_coffee),
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.tertiary
-            )
-        }
+
     }
     }
 }

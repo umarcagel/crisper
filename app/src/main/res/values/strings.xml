@@ -1,13 +1,13 @@
 <resources>
     <string name="app_name">Crisper</string>
-    <string name="title_compressor">Compressor</string>
+    <string name="title_compressor">Crisper</string>
     <string name="share">Share</string>
     <string name="saved">Saved</string>
     <string name="saving">Saving…</string>
     <string name="save_action">Save</string>
     <string name="save_to_photos">Save to Photos</string>
     <string name="compress_another_video">Compress Another Video</string>
-    <string name="buy_coffee">☕ Happy with Compressor? Buy me a coffee!</string>
+    <string name="buy_coffee">☕ Happy with Crisper? Buy me a coffee!</string>
     <string name="share_video_title">Share Compressed Video</string>
     <string name="share_error">Cannot share: %1$s</string>
     <string name="original">Original</string>
@@ -69,7 +69,7 @@
     <string name="error_prefix">Error: %1$s</string>
     <string name="select_video">Select a video to compress</string>
     <string name="add_video_desc">Add Video</string>
-    <string name="total_saved">You\'ve saved %1$s of storage with Compressor</string>
+    <string name="total_saved">You\'ve saved %1$s of storage with Crisper</string>
 
     <string name="slider_less_space">Less Space</string>
     <string name="slider_balanced">Balanced</string>
@@ -147,7 +147,7 @@
     <string name="search_icon_desc">Search</string>
     <string name="clear_search_desc">Clear search</string>
     <string name="no_settings_found">No settings found</string>
-    <string name="about_compressor_title">About Compressor</string>
+    <string name="about_compressor_title">About Crisper</string>
     <string name="basic_info_header">Basic Info</string>
     <string name="display_settings_title">General</string>
     <string name="general_settings_title">General</string>
@@ -175,10 +175,10 @@
     <string name="auto_save_photos_title">Automatically save</string>
     <string name="auto_save_photos_subtitle">Automatically save compressed videos after compression</string>
     <string name="output_location_title">Save location</string>
-    <string name="output_location_default">Photos (Movies/Compressor)</string>
+    <string name="output_location_default">Photos (Movies/Crisper)</string>
     <string name="output_location_subtitle">Where compressed videos are saved by default</string>
     <string name="output_location_reset_title">Use default (Photos)</string>
-    <string name="output_location_reset_subtitle">Reset save location to Movies/Compressor</string>
+    <string name="output_location_reset_subtitle">Reset save location to Movies/Crisper</string>
 
     <string name="filename_builder_title">Filename builder</string>
     <string name="filename_builder_subtitle">Drag and drop chips to rearrange, add and remove.</string>
@@ -273,27 +273,27 @@
     <string name="reset_audio_defaults">Reset Audio Defaults</string>
 
     <!-- What's New Dialog -->
-    <string name="whats_new_title">What\'s new in Compressor</string>
+    <string name="whats_new_title">What\'s new in Crisper</string>
     <string name="whats_new_version">Version %1$s</string>
     <string name="whats_new_button">Got it</string>
     <string name="next">Next</string>
-    <string name="permission_screen_title">Compressor uses permissions to do more</string>
+    <string name="permission_screen_title">Crisper uses permissions to do more</string>
     <string name="permission_screen_subtitle">This release includes new features like deleting the original video and keeping the original file name which needs your permission to work.</string>
     <string name="permission_card_videos_title">Access Gallery</string>
     <string name="permission_card_videos_desc">Only accesses video metadata to identify original file names and delete original videos when you ask.</string>
     <string name="permission_card_storage_title">Still can\'t access your phone\'s storage</string>
-    <string name="permission_card_storage_desc">Compressor has no access to your personal photos, documents, downloads, or any other files.</string>
+    <string name="permission_card_storage_desc">Crisper has no access to your personal photos, documents, downloads, or any other files.</string>
     <string name="permission_card_network_title">Still doesn\'t access the internet</string>
-    <string name="permission_card_network_desc">Compressor has no network access. Everything happens 100% offline and privately on your device.</string>
-    <string name="permission_screen_footer">You don\'t have to grant permission if you don\'t want to. If you choose not to, Compressor will continue working like it did before. You can always change this in Settings.</string>
+    <string name="permission_card_network_desc">Crisper has no network access. Everything happens 100% offline and privately on your device.</string>
+    <string name="permission_screen_footer">You don\'t have to grant permission if you don\'t want to. If you choose not to, Crisper will continue working like it did before. You can always change this in Settings.</string>
     <string name="grant_permission">Grant permission</string>
     <string name="decline_permission">Decline</string>
     <string name="whats_new_1_title">Delete Original</string>
     <string name="whats_new_1_desc">Save even more storage by deleting the original video after compressing it (Android 13+)</string>
     <string name="whats_new_2_title">Pick your Picker</string>
     <string name="whats_new_2_desc">Have a preferred app for picking which video to compress? You can now select it in Settings.</string>
-    <string name="whats_new_3_title">Help Translate Compressor!</string>
-    <string name="whats_new_3_desc">Want to see Compressor in your language? See a mistake in the translations? Help translate Compressor on Crowdin</string>
+    <string name="whats_new_3_title">Help Translate Crisper!</string>
+    <string name="whats_new_3_desc">Want to see Crisper in your language? See a mistake in the translations? Help translate Crisper on Crowdin</string>
     <string name="whats_new_4_title">Constantly Improving</string>
     <string name="whats_new_4_desc">This release fixes multiple bugs and improves compression quality and UX</string>
     <!-- Extra Size Cushion -->

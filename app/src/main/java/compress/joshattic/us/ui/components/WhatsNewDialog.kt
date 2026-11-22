@@ -195,23 +195,6 @@ fun WhatsNewDialog(
                                         title = stringResource(R.string.whats_new_2_title),
                                         description = stringResource(R.string.whats_new_2_desc)
                                     )
-
-                                    WhatsNewItem(
-                                        icon = Icons.Default.Translate,
-                                        bgColor = if (isDark) Color(0xFF4A2B00) else Color(0xFFFFF3E0),
-                                        iconTint = if (isDark) Color(0xFFFFCC80) else Color(0xFFF57C00),
-                                        title = stringResource(R.string.whats_new_3_title),
-                                        description = stringResource(R.string.whats_new_3_desc),
-                                        onClick = { uriHandler.openUri("https://l.joshattic.us/rHkokL") }
-                                    )
-
-                                    WhatsNewItem(
-                                        icon = Icons.Default.Favorite,
-                                        bgColor = if (isDark) Color(0xFF4A1C1D) else Color(0xFFFFEBEE),
-                                        iconTint = if (isDark) Color(0xFFEF9A9A) else Color(0xFFD32F2F),
-                                        title = stringResource(R.string.whats_new_4_title),
-                                        description = stringResource(R.string.whats_new_4_desc)
-                                    )
                                 }
 
                                 Spacer(modifier = Modifier.height(16.dp))

@@ -118,7 +118,6 @@ fun rememberSearchableSettings(
     val enableAllCodecs = stringResource(R.string.enable_all_codecs)
     val headerHardwareCodecs = stringResource(R.string.header_hardware_codecs)
     val viewOnGithub = stringResource(R.string.view_on_github)
-    val buyMeACoffee = stringResource(R.string.buy_me_a_coffee)
     val infoCopyClipboard = stringResource(R.string.info_copy_clipboard)
     val headerLinksActions = stringResource(R.string.header_links_actions)
 
@@ -235,8 +234,7 @@ fun rememberSearchableSettings(
         settings.add(SearchableSetting(infoAndroid, "Android ${Build.VERSION.RELEASE}", aboutTitle, "about", Icons.Default.Info, onNavigateToAbout))
         settings.add(SearchableSetting(infoSupportedCodecs, codecsSupportedCount, aboutTitle, "about", Icons.Default.Info, onNavigateToAbout))
         settings.add(SearchableSetting(enableAllCodecs, headerHardwareCodecs, aboutTitle, "about", Icons.Default.Info, onNavigateToAbout))
-        settings.add(SearchableSetting(viewOnGithub, "https://github.com/JoshAtticus/Compressor", aboutTitle, "about", Icons.Default.Build, onNavigateToAbout))
-        settings.add(SearchableSetting(buyMeACoffee, "https://buymeacoffee.com/joshatticus", aboutTitle, "about", Icons.Default.Favorite, onNavigateToAbout))
+        settings.add(SearchableSetting(viewOnGithub, "https://github.com/umarcagel/crisper", aboutTitle, "about", Icons.Default.Build, onNavigateToAbout))
         settings.add(SearchableSetting(infoCopyClipboard, headerLinksActions, aboutTitle, "about", Icons.Default.Info, onNavigateToAbout))
 
         settings

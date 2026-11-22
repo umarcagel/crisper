@@ -133,7 +133,8 @@ private fun loadVideos(context: Context): List<LibraryVideo> {
                         sizeBytes = cursor.getLong(sizeCol),
                         durationMs = cursor.getLong(durCol),
                         dateAdded = cursor.getLong(dateCol),
-                        isCompressed = path.contains("/Movies/Compressor/", ignoreCase = true)
+                        isCompressed = path.contains("/Movies/Crisper/", ignoreCase = true) ||
+                            path.contains("/Movies/Compressor/", ignoreCase = true)
                     )
                 )
             }

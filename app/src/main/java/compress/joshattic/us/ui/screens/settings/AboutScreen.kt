@@ -419,7 +419,7 @@ fun AboutScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { uriHandler.openUri("https://github.com/JoshAtticus/Compressor") }
+                            .clickable { uriHandler.openUri("https://github.com/umarcagel/crisper") }
                             .padding(horizontal = 20.dp, vertical = 18.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -431,30 +431,6 @@ fun AboutScreen(
                         Spacer(modifier = Modifier.width(16.dp))
                         Text(
                             text = stringResource(R.string.view_on_github),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { uriHandler.openUri("https://buymeacoffee.com/joshatticus") }
-                            .padding(horizontal = 20.dp, vertical = 18.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text(
-                            text = stringResource(R.string.buy_me_a_coffee),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,

@@ -2125,7 +2125,7 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                         put(MediaStore.Video.Media.IS_PENDING, 1)
-                        put(MediaStore.Video.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES + "/Compressor")
+                        put(MediaStore.Video.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES + "/Crisper")
                     }
                 }
 
