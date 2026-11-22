@@ -18,10 +18,22 @@ android {
         applicationId = "com.crisper.videocompressor"
         minSdk = 24
         targetSdk = 37
-        versionCode = 29
-        versionName = "1.7.0"
+        // Each GitHub build gets a higher number so the phone accepts it as an update.
+        val buildNumber = (System.getenv("GITHUB_RUN_NUMBER") ?: "0").toInt()
+        versionCode = 100 + buildNumber
+        versionName = "1.0.$buildNumber"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // Fixed signing key so every build can update the previous one in place.
+    signingConfigs {
+        getByName("debug") {
+            storeFile = rootProject.file("crisper.keystore")
+            storePassword = "crisper123"
+            keyAlias = "crisper"
+            keyPassword = "crisper123"
+        }
     }
 
     buildTypes {
