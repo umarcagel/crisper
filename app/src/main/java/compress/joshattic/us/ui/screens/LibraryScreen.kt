@@ -37,6 +37,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.GridView
+import androidx.compose.material.icons.outlined.Videocam
 import androidx.compose.material.icons.outlined.SwapVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -230,6 +231,32 @@ fun LibraryScreen(
         hasPermission = canReadVideos(context)
     }
 
+    // Record with the phone's own camera app, then bring the video straight back here
+    var pendingRecording by remember { mutableStateOf<Pair<java.io.File, Uri>?>(null) }
+    val recordLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CaptureVideo()
+    ) { saved ->
+        val rec = pendingRecording
+        pendingRecording = null
+        if (saved && rec != null && rec.first.exists() && rec.first.length() > 0L) {
+            onVideoSelected(rec.second)
+        }
+    }
+    val startRecording: () -> Unit = {
+        try {
+            val dir = java.io.File(context.cacheDir, "recordings").apply { mkdirs() }
+            val file = java.io.File(dir, "Recording_${System.currentTimeMillis()}.mp4")
+            val uri = androidx.core.content.FileProvider.getUriForFile(
+                context, context.packageName + ".provider", file
+            )
+            pendingRecording = file to uri
+            recordLauncher.launch(uri)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            android.widget.Toast.makeText(context, "No camera app found", android.widget.Toast.LENGTH_SHORT).show()
+        }
+    }
+
     var videos by remember { mutableStateOf<List<LibraryVideo>?>(null) }
     LaunchedEffect(hasPermission) {
         videos = if (hasPermission) withContext(Dispatchers.IO) { loadVideos(context) } else emptyList()
@@ -290,6 +317,9 @@ fun LibraryScreen(
             }
             IconButton(onClick = { columns = if (columns == 3) 2 else 3 }) {
                 Icon(Icons.Outlined.GridView, contentDescription = "Change grid size")
+            }
+            IconButton(onClick = startRecording) {
+                Icon(Icons.Outlined.Videocam, contentDescription = "Record a video")
             }
             IconButton(onClick = onPickWithPicker) {
                 Icon(Icons.Outlined.FolderOpen, contentDescription = "Pick a video")
