@@ -2285,6 +2285,28 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    private fun originalDateMillis(context: Context, uri: Uri?): Long? {
+        if (uri == null) return null
+        return try {
+            val projection = arrayOf(
+                MediaStore.Video.Media.DATE_TAKEN,
+                MediaStore.Video.Media.DATE_MODIFIED
+            )
+            context.contentResolver.query(uri, projection, null, null, null)?.use { c ->
+                if (!c.moveToFirst()) return@use null
+                val taken = if (c.isNull(0)) 0L else c.getLong(0)
+                val modified = if (c.isNull(1)) 0L else c.getLong(1)
+                when {
+                    taken > 0L -> taken
+                    modified > 0L -> modified * 1000L
+                    else -> null
+                }
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     fun saveToGallery(context: Context) {
         val currentState = _uiState.value
         if (currentState.isSaving) return
@@ -2306,6 +2328,12 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
                     put(MediaStore.Video.Media.DISPLAY_NAME, targetName)
                     put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
                     put(MediaStore.Video.Media.DATE_ADDED, System.currentTimeMillis() / 1000)
+
+                    // Keep the original video's date so it stays in the right place in the gallery
+                    originalDateMillis(context, currentState.selectedUri)?.let { takenMs ->
+                        put(MediaStore.Video.Media.DATE_TAKEN, takenMs)
+                        put(MediaStore.Video.Media.DATE_MODIFIED, takenMs / 1000)
+                    }
 
                     if (!containsKey(MediaStore.Video.Media.DATE_ADDED)) {
                         put(MediaStore.Video.Media.DATE_ADDED, System.currentTimeMillis() / 1000)
