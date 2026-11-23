@@ -329,4 +329,7 @@
     <string name="batch_summary">%1$d compressed · %2$d skipped · %3$d failed</string>
     <string name="batch_saved_total">Saved %1$s</string>
     <string name="batch_done_button">Done</string>
+    <string name="notification_channel_name">Compression progress</string>
+    <string name="notification_title_default">Compressing video</string>
+    <string name="notification_text">%1$d%% done · tap to open Crisper</string>
 </resources>

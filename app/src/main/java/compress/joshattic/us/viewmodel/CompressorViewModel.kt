@@ -40,6 +40,8 @@ import androidx.media3.transformer.ExportResult
 import androidx.media3.transformer.Transformer
 import androidx.media3.transformer.VideoEncoderSettings
 import compress.joshattic.us.BuildConfig
+import compress.joshattic.us.CompressionNotification
+import compress.joshattic.us.CompressionService
 import compress.joshattic.us.R
 import compress.joshattic.us.model.CompressorUiState
 import compress.joshattic.us.model.FilenameSegment
@@ -61,6 +63,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -123,7 +127,39 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
             Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
     }
 
+    /** Starts the foreground service while compressing and keeps its notification up to date. */
+    private fun watchBackgroundWork() {
+        viewModelScope.launch {
+            var running = false
+            _uiState.map { s ->
+                val active = s.isCompressing || (s.batchTotal > 0 && !s.batchFinished)
+                val overall = if (s.batchTotal > 0) {
+                    ((s.batchIndex - 1).coerceAtLeast(0) + s.progress.coerceIn(0f, 1f)) / s.batchTotal
+                } else {
+                    s.progress.coerceIn(0f, 1f)
+                }
+                val title = if (s.batchTotal > 0) {
+                    "Compressing ${s.batchIndex} of ${s.batchTotal}"
+                } else {
+                    getApplication<Application>().getString(R.string.notification_title_default)
+                }
+                Triple(active, (overall * 100).toInt().coerceIn(0, 100), title)
+            }.distinctUntilChanged().collect { (active, percent, title) ->
+                val app = getApplication<Application>()
+                if (active && !running) {
+                    CompressionService.start(app, title, percent)
+                } else if (active) {
+                    CompressionNotification.update(app, title, percent)
+                } else if (running) {
+                    CompressionService.stop(app)
+                }
+                running = active
+            }
+        }
+    }
+
     init {
+        watchBackgroundWork()
         val saved = prefs.getLong("total_saved_bytes", 0L)
         val showBitrate = prefs.getBoolean("show_bitrate", false)
         val useMbps = prefs.getBoolean("use_mbps", false)

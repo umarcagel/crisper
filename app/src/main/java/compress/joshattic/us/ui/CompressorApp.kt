@@ -82,6 +82,19 @@ enum class SettingsDestination {
 fun CompressorApp(viewModel: CompressorViewModel) {
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { }
+    val isWorking = state.isCompressing || state.batchTotal > 0
+    LaunchedEffect(isWorking) {
+        if (isWorking && android.os.Build.VERSION.SDK_INT >= 33 &&
+            androidx.core.content.ContextCompat.checkSelfPermission(
+                context, android.Manifest.permission.POST_NOTIFICATIONS
+            ) != android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
     val window = (context as? ComponentActivity)?.window
 
     var forceShowResult by remember { mutableStateOf(false) }
