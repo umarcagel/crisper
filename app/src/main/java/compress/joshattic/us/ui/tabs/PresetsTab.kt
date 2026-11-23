@@ -42,6 +42,8 @@ import androidx.compose.ui.unit.dp
 import compress.joshattic.us.R
 import compress.joshattic.us.model.CompressorUiState
 import compress.joshattic.us.model.QualityPreset
+import compress.joshattic.us.model.WHATSAPP_ULTRA_TARGET_MB
+import androidx.media3.common.MimeTypes
 import compress.joshattic.us.utils.ExpressiveSpatialSpring
 import compress.joshattic.us.utils.expressiveScale
 import compress.joshattic.us.viewmodel.CompressorViewModel
@@ -135,6 +137,63 @@ fun PresetsTab(state: CompressorUiState, viewModel: CompressorViewModel) {
             }
         }
         
+        run {
+            val originalMb = state.originalSize.toFloat() / (1024f * 1024f)
+            val ultraEnabled = originalMb > WHATSAPP_ULTRA_TARGET_MB
+            val ultraSelected = ultraEnabled &&
+                state.activePreset == QualityPreset.CUSTOM &&
+                state.videoCodec == MimeTypes.VIDEO_H264 &&
+                kotlin.math.abs(state.targetSizeMb - WHATSAPP_ULTRA_TARGET_MB) < 0.05f
+
+            OutlinedCard(
+                onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    viewModel.applyWhatsAppUltra()
+                },
+                enabled = ultraEnabled,
+                shape = RoundedCornerShape(24.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                colors = if (ultraSelected) {
+                    CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+                } else {
+                    CardDefaults.outlinedCardColors(containerColor = Color.Transparent)
+                },
+                border = if (ultraSelected) BorderStroke(0.dp, Color.Transparent) else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            stringResource(R.string.ultra_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            stringResource(if (ultraEnabled) R.string.ultra_desc else R.string.ultra_small_enough),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        if (ultraEnabled && state.durationMs > 30_000L) {
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                stringResource(R.string.ultra_long_note),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.tertiary
+                            )
+                        }
+                    }
+                    if (ultraSelected) {
+                        Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.onTertiaryContainer)
+                    }
+                }
+            }
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
 
         val sizePresets = state.targetSizePresets.filter { preset -> 

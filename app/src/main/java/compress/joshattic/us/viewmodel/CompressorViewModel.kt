@@ -46,6 +46,7 @@ import compress.joshattic.us.model.FilenameSegment
 import compress.joshattic.us.model.DefaultAudioConfig
 import compress.joshattic.us.model.DefaultVideoConfig
 import compress.joshattic.us.model.QualityPreset
+import compress.joshattic.us.model.WHATSAPP_ULTRA_TARGET_MB
 import compress.joshattic.us.model.QualityPresetConfig
 import compress.joshattic.us.model.TargetSizePreset
 import compress.joshattic.us.model.VideoPickerMode
@@ -1069,6 +1070,26 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
                 targetFpsLocked = false,
                 audioBitrateLocked = false
             ).autoAdjust(mb)
+        }
+    }
+
+    /**
+     * Ultra mode for WhatsApp Status: H.264 (the codec WhatsApp expects) with the sharpest
+     * picture that still fits just under WhatsApp's size cap.
+     */
+    fun applyWhatsAppUltra() {
+        _uiState.update { current ->
+            val codec = MimeTypes.VIDEO_H264
+            current.copy(
+                videoCodec = codec,
+                useH265 = false,
+                targetSizeMb = WHATSAPP_ULTRA_TARGET_MB,
+                activePreset = QualityPreset.CUSTOM,
+                targetResolutionLocked = false,
+                targetFpsLocked = false,
+                audioBitrateLocked = false,
+                removeAudio = false
+            ).autoAdjust(WHATSAPP_ULTRA_TARGET_MB)
         }
     }
 

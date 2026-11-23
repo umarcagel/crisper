@@ -11,6 +11,9 @@ sealed class FilenameSegment {
     data class Token(val key: String) : FilenameSegment()
 }
 
+/** Ultra mode target: WhatsApp Status videos are capped around 16 MB, so aim just under it. */
+const val WHATSAPP_ULTRA_TARGET_MB = 15.5f
+
 val defaultTargetSizePresets = listOf(
     TargetSizePreset("github", 10f, "GitHub"),
     TargetSizePreset("discord", 20f, "Discord"),

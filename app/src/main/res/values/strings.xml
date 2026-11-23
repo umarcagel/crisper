@@ -282,7 +282,7 @@
     <string name="permission_card_videos_title">Access Gallery</string>
     <string name="permission_card_videos_desc">Only accesses video metadata to identify original file names and delete original videos when you ask.</string>
     <string name="permission_card_storage_title">Still can\'t access your phone\'s storage</string>
-    <string name="permission_card_storage_desc">Crisper has no access to your personal photos, documents, downloads, or any other files.</string>
+    <string name="permission_card_storage_desc">Crisper only reads your videos so it can list and compress them. It has no access to your photos, documents or other files.</string>
     <string name="permission_card_network_title">Still doesn\'t access the internet</string>
     <string name="permission_card_network_desc">Crisper has no network access. Everything happens 100% offline and privately on your device.</string>
     <string name="permission_screen_footer">You don\'t have to grant permission if you don\'t want to. If you choose not to, Crisper will continue working like it did before. You can always change this in Settings.</string>
@@ -309,4 +309,8 @@
     <string name="video_picker_mode_gallery_app">Gallery apps</string>
     <string name="video_picker_mode_gallery_app_desc">Pick what gallery app to use to choose videos</string>
     <string name="select_gallery_app">Select gallery app</string>
+    <string name="ultra_title">Ultra · WhatsApp Status</string>
+    <string name="ultra_desc">Sharpest picture that fits under WhatsApp\'s size limit, saved as H.264 so WhatsApp has little reason to squash it again.</string>
+    <string name="ultra_small_enough">Already small enough for WhatsApp Status.</string>
+    <string name="ultra_long_note">Status length limits differ between WhatsApp versions (about 30 to 90 seconds). Longer clips may need trimming.</string>
 </resources>
