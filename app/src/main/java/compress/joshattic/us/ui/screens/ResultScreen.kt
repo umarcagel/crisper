@@ -271,6 +271,26 @@ fun ResultScreen(
             }
         }
         
+        var showPlayer by remember { mutableStateOf(false) }
+        val playCompressed = state.compressedUri
+        if (playCompressed != null) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Button(
+                onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    showPlayer = true
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 52.dp)
+            ) {
+                Text(stringResource(R.string.player_play_compressed), fontWeight = FontWeight.Bold)
+            }
+            if (showPlayer) {
+                compress.joshattic.us.ui.components.VideoPlayerDialog(uri = playCompressed, onDismiss = { showPlayer = false })
+            }
+        }
+
         var showCompare by remember { mutableStateOf(false) }
         val compareOriginal = state.selectedUri ?: state.originalMediaUri
         val compareCompressed = state.compressedUri

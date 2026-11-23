@@ -340,4 +340,7 @@
     <string name="crop_title">Crop</string>
     <string name="crop_none">Original</string>
     <string name="crop_hint">Keeps the centre of the picture. Nothing else changes.</string>
+    <string name="player_close">Close</string>
+    <string name="player_play_original">Play video</string>
+    <string name="player_play_compressed">Play compressed video</string>
 </resources>
