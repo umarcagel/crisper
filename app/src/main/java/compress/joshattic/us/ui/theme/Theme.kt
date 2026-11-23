@@ -8,12 +8,13 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary                = A16BadgeAppGreen,
-    onPrimary              = CompressorDarkGreenBackground,
+    primary                = CrisperTealOnDark,
+    onPrimary              = Color(0xFF00382E),
     primaryContainer       = CompressorDarkPrimaryContainer,
     onPrimaryContainer     = CompressorDarkOnPrimaryContainer,
     secondary              = CompressorDarkSecondary,
@@ -35,7 +36,7 @@ private val DarkColorScheme = darkColorScheme(
     onSurfaceVariant       = CompressorDarkGreenOnSurfaceVariant,
     outline                = CompressorDarkGreenOutline,
     outlineVariant         = CompressorDarkGreenOutlineVariant,
-    surfaceTint            = A16BadgeAppGreen,
+    surfaceTint            = CrisperTealOnDark,
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -68,7 +69,7 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun CompressorTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
