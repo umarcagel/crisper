@@ -9,10 +9,10 @@
     <color name="white">#FFFFFFFF</color>
 
     <!-- App Launcher Icon Gradient Colors (Fallback for Android < 31) -->
-    <color name="ic_launcher_gradient_start">#FF16F976</color>
-    <color name="ic_launcher_gradient_end">#FF01A848</color>
+    <color name="ic_launcher_gradient_start">#FF22D3A6</color>
+    <color name="ic_launcher_gradient_end">#FF0A5F7A</color>
 
     <!-- App Launcher Icon Default Brand Colors for Settings -->
-    <color name="ic_launcher_gradient_start_default">#FF16F976</color>
-    <color name="ic_launcher_gradient_end_default">#FF01A848</color>
+    <color name="ic_launcher_gradient_start_default">#FF22D3A6</color>
+    <color name="ic_launcher_gradient_end_default">#FF0A5F7A</color>
 </resources>
