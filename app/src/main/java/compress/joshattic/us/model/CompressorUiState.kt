@@ -38,6 +38,8 @@ data class CompressorUiState(
     val originalFps: Float = 30f,
     val originalVideoMime: String? = null,
     val durationMs: Long = 0L,
+    val trimStartMs: Long = 0L,
+    val trimLengthMs: Long = 0L, // 0 means keep everything after the start
     val originalName: String? = null,
     
     val isCompressing: Boolean = false,
@@ -100,10 +102,17 @@ data class CompressorUiState(
         FilenameSegment.Text("")
     )
 ) {
+    /** Length of the part of the video that will be kept (after trimming). */
+    val effectiveDurationMs: Long
+        get() {
+            val available = (durationMs - trimStartMs).coerceAtLeast(0L)
+            return if (trimLengthMs > 0L) minOf(trimLengthMs, available) else available
+        }
+
     val targetSizeWarning: Boolean
         get() {
             val cushionRatio = if (extraSizeCushion) (0.88f / 0.96f) else 1.0f
-            return durationMs > 0 && (targetSizeMb * cushionRatio) < minimumSizeMb
+            return effectiveDurationMs > 0 && (targetSizeMb * cushionRatio) < minimumSizeMb
         }
 
     /** Returns the settings autoAdjust would choose if user locks were released. */
@@ -160,8 +169,8 @@ data class CompressorUiState(
 
     val minimumSizeMb: Float
         get() {
-            if (durationMs <= 0) return 0.1f
-            val seconds = durationMs / 1000f
+            if (effectiveDurationMs <= 0) return 0.1f
+            val seconds = effectiveDurationMs / 1000f
             val audioBits = if (removeAudio) 0f else {
                 val rate = if (audioBitrate == 0) 256_000f else audioBitrate.toFloat()
                 rate * seconds
@@ -177,7 +186,7 @@ data class CompressorUiState(
     
     val targetBitrate: Int
         get() {
-             val durationSec = if (durationMs > 0) durationMs / 1000.0 else 0.0
+             val durationSec = if (effectiveDurationMs > 0) effectiveDurationMs / 1000.0 else 0.0
              if (durationSec <= 0) return 2_000_000
              
              // Target 96% of requested size as a safety cushion against hardware encoder bitrate overshoot,
@@ -260,7 +269,7 @@ data class CompressorUiState(
         var attempts = 0
         val maxAttempts = 20
 
-        val durationSec = if (durationMs > 0) durationMs / 1000.0 else 1.0
+        val durationSec = if (effectiveDurationMs > 0) effectiveDurationMs / 1000.0 else 1.0
         val cushionFactor = if (state.extraSizeCushion) 0.88f else 0.96f
         val effectiveTargetMb = targetMb * (cushionFactor / 0.96f)
         val targetBits = targetMb * 8 * 1024 * 1024 * cushionFactor

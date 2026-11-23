@@ -29,6 +29,9 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.material3.Slider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +64,62 @@ fun PresetsTab(state: CompressorUiState, viewModel: CompressorViewModel) {
             .padding(horizontal = 24.dp, vertical = 24.dp)
     ) {
         
+        if (state.durationMs > 5_000L) {
+            Text(
+                stringResource(R.string.trim_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            val fullLabel = stringResource(R.string.trim_full)
+            val lengthOptions = listOf(0L to fullLabel, 30_000L to "30 s", 60_000L to "60 s", 90_000L to "90 s")
+                .filter { it.first == 0L || it.first < state.durationMs }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                lengthOptions.forEach { (lengthMs, label) ->
+                    FilterChip(
+                        selected = state.trimLengthMs == lengthMs,
+                        onClick = {
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            viewModel.setTrim(state.trimStartMs, lengthMs)
+                        },
+                        label = { Text(label) }
+                    )
+                }
+            }
+            if (state.trimLengthMs > 0L) {
+                val maxStartSec = ((state.durationMs - state.trimLengthMs) / 1000f).coerceAtLeast(0f)
+                var startSec by remember(state.trimStartMs, state.trimLengthMs) {
+                    mutableFloatStateOf(state.trimStartMs / 1000f)
+                }
+                fun clock(seconds: Float): String {
+                    val total = seconds.toInt()
+                    return String.format("%d:%02d", total / 60, total % 60)
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    stringResource(R.string.trim_info, clock(startSec), clock(state.effectiveDurationMs / 1000f)),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (maxStartSec > 0.5f) {
+                    Slider(
+                        value = startSec.coerceIn(0f, maxStartSec),
+                        onValueChange = { startSec = it },
+                        onValueChangeFinished = {
+                            viewModel.setTrim((startSec * 1000f).toLong(), state.trimLengthMs)
+                        },
+                        valueRange = 0f..maxStartSec
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
         Text(
             stringResource(R.string.quality_preset),
             style = MaterialTheme.typography.titleMedium,
@@ -178,7 +237,7 @@ fun PresetsTab(state: CompressorUiState, viewModel: CompressorViewModel) {
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        if (ultraEnabled && state.durationMs > 30_000L) {
+                        if (ultraEnabled && state.effectiveDurationMs > 30_000L) {
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
                                 stringResource(R.string.ultra_long_note),

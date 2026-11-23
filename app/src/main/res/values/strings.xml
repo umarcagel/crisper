@@ -313,4 +313,7 @@
     <string name="ultra_desc">Sharpest picture that fits under WhatsApp\'s size limit, saved as H.264 so WhatsApp has little reason to squash it again.</string>
     <string name="ultra_small_enough">Already small enough for WhatsApp Status.</string>
     <string name="ultra_long_note">Status length limits differ between WhatsApp versions (about 30 to 90 seconds). Longer clips may need trimming.</string>
+    <string name="trim_title">Trim</string>
+    <string name="trim_full">Full video</string>
+    <string name="trim_info">Starts at %1$s · clip length %2$s</string>
 </resources>

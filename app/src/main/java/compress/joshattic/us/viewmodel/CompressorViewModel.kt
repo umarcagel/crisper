@@ -455,6 +455,8 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
                     originalFps = fps,
                     originalVideoMime = videoMime,
                     durationMs = duration,
+                    trimStartMs = 0L,
+                    trimLengthMs = 0L,
                     originalName = originalName,
                     targetSizeMb = defaultTargetMb,
                     targetResolutionHeight = targetHeight,
@@ -525,7 +527,8 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
         if (config != null) {
             val targetHeight = if (config.resolutionShortSide > 0) getTargetHeight(config.resolutionShortSide) else current.originalHeight
             val targetFpsVal = if (config.targetFps > 0 && current.originalFps >= config.targetFps) config.targetFps else 0
-            val targetMb = (current.originalSize / (1024.0 * 1024.0) * config.sizeRatio).toFloat().coerceAtLeast(0.1f)
+            val keptFraction = if (current.durationMs > 0) current.effectiveDurationMs.toDouble() / current.durationMs else 1.0
+            val targetMb = (current.originalSize / (1024.0 * 1024.0) * config.sizeRatio * keptFraction).toFloat().coerceAtLeast(0.1f)
 
             _uiState.update { 
                 it.copy(
@@ -1093,6 +1096,18 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    /** Keep only part of the video: start at [startMs] and keep [lengthMs] (0 = until the end). */
+    fun setTrim(startMs: Long, lengthMs: Long) {
+        _uiState.update { cur ->
+            val maxStart = if (lengthMs > 0L) (cur.durationMs - lengthMs).coerceAtLeast(0L) else 0L
+            val start = startMs.coerceIn(0L, maxStart)
+            val updated = cur.copy(trimStartMs = start, trimLengthMs = lengthMs)
+            if (updated.durationMs > 0) updated.autoAdjust(updated.targetSizeMb) else updated
+        }
+        val preset = _uiState.value.activePreset
+        if (preset != QualityPreset.CUSTOM) applyPreset(preset)
+    }
+
     fun setVideoCodec(codec: String) {
         _uiState.update { 
             val temp = it.copy(
@@ -1437,6 +1452,8 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
                 originalFps = 30f,
                 originalVideoMime = null,
                 durationMs = 0L,
+                trimStartMs = 0L,
+                trimLengthMs = 0L,
                 originalName = null,
                 isCompressing = false,
                 progress = 0f,
@@ -1708,7 +1725,16 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
               }
         }
 
-        val mediaItem = MediaItem.fromUri(inputUri)
+        val mediaItemBuilder = MediaItem.Builder().setUri(inputUri)
+        if (currentState.trimStartMs > 0L || currentState.trimLengthMs > 0L) {
+            mediaItemBuilder.setClippingConfiguration(
+                MediaItem.ClippingConfiguration.Builder()
+                    .setStartPositionMs(currentState.trimStartMs)
+                    .setEndPositionMs(currentState.trimStartMs + currentState.effectiveDurationMs)
+                    .build()
+            )
+        }
+        val mediaItem = mediaItemBuilder.build()
         val audioProcessors: List<androidx.media3.common.audio.AudioProcessor> = if (shouldIncludeAudio && !audioPassthrough) {
             listOf(VolumeAudioProcessor().apply { setVolume(currentState.audioVolume) })
         } else {
