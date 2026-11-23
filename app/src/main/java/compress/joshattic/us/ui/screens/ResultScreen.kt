@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import compress.joshattic.us.R
 import compress.joshattic.us.model.CompressorUiState
+import compress.joshattic.us.ui.components.CompareDialog
 import compress.joshattic.us.utils.hasVideoPermission
 import compress.joshattic.us.utils.scaleOnPress
 
@@ -270,6 +271,33 @@ fun ResultScreen(
             }
         }
         
+        var showCompare by remember { mutableStateOf(false) }
+        val compareOriginal = state.selectedUri ?: state.originalMediaUri
+        val compareCompressed = state.compressedUri
+        if (compareOriginal != null && compareCompressed != null) {
+            Spacer(modifier = Modifier.height(12.dp))
+            OutlinedButton(
+                onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    showCompare = true
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 52.dp)
+            ) {
+                Text(stringResource(R.string.compare_button), fontWeight = FontWeight.Bold)
+            }
+            if (showCompare) {
+                CompareDialog(
+                    originalUri = compareOriginal,
+                    compressedUri = compareCompressed,
+                    trimStartMs = state.trimStartMs,
+                    clipDurationMs = state.effectiveDurationMs,
+                    onDismiss = { showCompare = false }
+                )
+            }
+        }
+
         val canShowDelete = (state.saveSuccess || state.hasShared || state.isOriginalDeleted) &&
                 state.selectedUri != null &&
                 hasVideoPermission(context)

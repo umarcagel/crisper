@@ -316,4 +316,11 @@
     <string name="trim_title">Trim</string>
     <string name="trim_full">Full video</string>
     <string name="trim_info">Starts at %1$s · clip length %2$s</string>
+    <string name="compare_button">Compare before and after</string>
+    <string name="compare_title">Before and after</string>
+    <string name="compare_original">Original</string>
+    <string name="compare_compressed">Compressed</string>
+    <string name="compare_close">Close</string>
+    <string name="compare_unavailable">Preview is not available for this video.</string>
+    <string name="compare_hint">Drag across the picture to move the divider. Use the slider to pick the moment.</string>
 </resources>
