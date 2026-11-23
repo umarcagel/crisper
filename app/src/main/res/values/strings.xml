@@ -337,4 +337,7 @@
     <string name="audio_extract_working">Extracting audio…</string>
     <string name="audio_extract_done">Saved to Music/Crisper</string>
     <string name="audio_extract_failed">Could not extract audio from this video</string>
+    <string name="crop_title">Crop</string>
+    <string name="crop_none">Original</string>
+    <string name="crop_hint">Keeps the centre of the picture. Nothing else changes.</string>
 </resources>

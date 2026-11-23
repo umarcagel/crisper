@@ -493,7 +493,7 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
                     originalFps = fps,
                     originalVideoMime = videoMime,
                     durationMs = duration,
-                    trimStartMs = 0L,
+                    trimStartMs = 0L, cropRatio = 0f,
                     trimLengthMs = 0L,
                     originalName = originalName,
                     targetSizeMb = defaultTargetMb,
@@ -1241,6 +1241,10 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     /** Keep only part of the video: start at [startMs] and keep [lengthMs] (0 = until the end). */
+    fun setCropRatio(ratio: Float) {
+        _uiState.update { it.copy(cropRatio = ratio) }
+    }
+
     fun setTrim(startMs: Long, lengthMs: Long) {
         _uiState.update { cur ->
             val maxStart = if (lengthMs > 0L) (cur.durationMs - lengthMs).coerceAtLeast(0L) else 0L
@@ -1596,7 +1600,7 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
                 originalFps = 30f,
                 originalVideoMime = null,
                 durationMs = 0L,
-                trimStartMs = 0L,
+                trimStartMs = 0L, cropRatio = 0f,
                 trimLengthMs = 0L,
                 originalName = null,
                 isCompressing = false,
@@ -1856,7 +1860,24 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
             
         val effectsList = mutableListOf<Effect>()
 
-           if (plan.outputHeight > 0 && plan.outputHeight != currentState.originalHeight) {
+        val cropOw = currentState.originalWidth
+        val cropOh = currentState.originalHeight
+        if (currentState.cropRatio > 0f && cropOw > 0 && cropOh > 0) {
+            val srcAspect = cropOw.toFloat() / cropOh
+            val r = currentState.cropRatio
+            var fracW = 1f
+            var fracH = 1f
+            if (r < srcAspect) fracW = r / srcAspect else fracH = srcAspect / r
+            effectsList.add(androidx.media3.effect.Crop(-fracW, fracW, -fracH, fracH))
+            val scale = if (plan.outputHeight in 1 until cropOh) plan.outputHeight.toFloat() / cropOh else 1f
+            var cw = (cropOw * fracW * scale).toInt()
+            var ch = (cropOh * fracH * scale).toInt()
+            if (cw % 2 != 0) cw -= 1
+            if (ch % 2 != 0) ch -= 1
+            if (cw > 0 && ch > 0) {
+                effectsList.add(Presentation.createForWidthAndHeight(cw, ch, Presentation.LAYOUT_SCALE_TO_FIT))
+            }
+        } else if (plan.outputHeight > 0 && plan.outputHeight != currentState.originalHeight) {
              val aspectRatio = if (currentState.originalHeight > 0) currentState.originalWidth.toFloat() / currentState.originalHeight else 16f/9f
                 var width = (plan.outputHeight * aspectRatio).toInt()
                 var height = plan.outputHeight

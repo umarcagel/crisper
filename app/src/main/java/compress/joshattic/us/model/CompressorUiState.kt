@@ -40,6 +40,7 @@ data class CompressorUiState(
     val durationMs: Long = 0L,
     val audioExtracting: Boolean = false,
     val audioExtractMessage: String? = null,
+    val cropRatio: Float = 0f, // 0 = no crop, otherwise width / height of the kept area
     val trimStartMs: Long = 0L,
     val trimLengthMs: Long = 0L, // 0 means keep everything after the start
     val originalName: String? = null,
@@ -97,9 +98,9 @@ data class CompressorUiState(
     val warnings: List<String> = emptyList(),
     val allCodecsEnabled: Boolean = false,
     val allCodecsUnlocked: Boolean = false,
-    val highPresetConfig: QualityPresetConfig = QualityPresetConfig(resolutionShortSide = 0, targetFps = 0, sizeRatio = 0.7f, audioBitrate = 320_000),
-    val mediumPresetConfig: QualityPresetConfig = QualityPresetConfig(resolutionShortSide = 1080, targetFps = 30, sizeRatio = 0.4f, audioBitrate = 192_000),
-    val lowPresetConfig: QualityPresetConfig = QualityPresetConfig(resolutionShortSide = 720, targetFps = 30, sizeRatio = 0.2f, audioBitrate = 128_000),
+    val highPresetConfig: QualityPresetConfig = QualityPresetConfig(resolutionShortSide = 0, targetFps = 0, sizeRatio = 0.75f, audioBitrate = 320_000),
+    val mediumPresetConfig: QualityPresetConfig = QualityPresetConfig(resolutionShortSide = 1080, targetFps = 30, sizeRatio = 0.5f, audioBitrate = 192_000),
+    val lowPresetConfig: QualityPresetConfig = QualityPresetConfig(resolutionShortSide = 720, targetFps = 30, sizeRatio = 0.3f, audioBitrate = 128_000),
     val targetSizePresets: List<TargetSizePreset> = defaultTargetSizePresets,
     val defaultVideoConfig: DefaultVideoConfig = DefaultVideoConfig(),
     val defaultAudioConfig: DefaultAudioConfig = DefaultAudioConfig(),
@@ -152,11 +153,11 @@ data class CompressorUiState(
                 h
             }
             var base = when {
-                effectiveShortSide >= 2160 -> 4_000_000L
-                effectiveShortSide >= 1440 -> 2_500_000L
-                effectiveShortSide >= 1080 -> 1_500_000L
-                effectiveShortSide >= 720 -> 1_000_000L
-                effectiveShortSide >= 480 -> 500_000L
+                effectiveShortSide >= 2160 -> 5_000_000L
+                effectiveShortSide >= 1440 -> 3_500_000L
+                effectiveShortSide >= 1080 -> 2_500_000L
+                effectiveShortSide >= 720 -> 1_500_000L
+                effectiveShortSide >= 480 -> 800_000L
                 effectiveShortSide >= 360 -> 350_000L
                 else -> 200_000L
             }

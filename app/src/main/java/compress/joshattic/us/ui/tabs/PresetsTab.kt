@@ -64,6 +64,38 @@ fun PresetsTab(state: CompressorUiState, viewModel: CompressorViewModel) {
             .padding(horizontal = 24.dp, vertical = 24.dp)
     ) {
         
+        Text(
+            stringResource(R.string.crop_title),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        val cropNone = stringResource(R.string.crop_none)
+        val cropOptions = listOf(0f to cropNone, 1f to "1:1", 4f / 5f to "4:5", 9f / 16f to "9:16", 16f / 9f to "16:9")
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            cropOptions.forEach { (ratio, label) ->
+                FilterChip(
+                    selected = kotlin.math.abs(state.cropRatio - ratio) < 0.001f,
+                    onClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        viewModel.setCropRatio(ratio)
+                    },
+                    label = { Text(label) }
+                )
+            }
+        }
+        Text(
+            stringResource(R.string.crop_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 6.dp, bottom = 20.dp)
+        )
+
         if (state.durationMs > 5_000L) {
             Text(
                 stringResource(R.string.trim_title),
