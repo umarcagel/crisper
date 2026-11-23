@@ -323,4 +323,10 @@
     <string name="compare_close">Close</string>
     <string name="compare_unavailable">Preview is not available for this video.</string>
     <string name="compare_hint">Drag across the picture to move the divider. Use the slider to pick the moment.</string>
+    <string name="batch_compressing">Compressing %1$d of %2$d</string>
+    <string name="batch_note">Each video is saved as soon as it finishes. Keep Crisper open.</string>
+    <string name="batch_all_done">All done</string>
+    <string name="batch_summary">%1$d compressed · %2$d skipped · %3$d failed</string>
+    <string name="batch_saved_total">Saved %1$s</string>
+    <string name="batch_done_button">Done</string>
 </resources>

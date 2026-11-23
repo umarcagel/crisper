@@ -64,6 +64,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.flow.first
 import java.io.File
 
 @OptIn(UnstableApi::class)
@@ -339,8 +341,8 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
             }
         }
 
-    fun updateSelectedUri(context: Context, uri: Uri) {
-        viewModelScope.launch(Dispatchers.IO) {
+    fun updateSelectedUri(context: Context, uri: Uri): Job {
+        return viewModelScope.launch(Dispatchers.IO) {
             var size = 0L
             var width = 0
             var height = 0
@@ -1094,6 +1096,112 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
                 removeAudio = false
             ).autoAdjust(WHATSAPP_ULTRA_TARGET_MB)
         }
+    }
+
+    private var batchJob: Job? = null
+    @Volatile private var batchCancelled = false
+
+    /**
+     * Compress several videos one after another with the same setting.
+     * [mode] is BEST, MEDIUM, SMALL or ULTRA (WhatsApp Status). Each finished video is saved right away.
+     */
+    fun startBatch(context: Context, uris: List<Uri>, mode: String) {
+        if (uris.isEmpty() || _uiState.value.batchTotal > 0) return
+        batchCancelled = false
+        _uiState.update {
+            it.copy(
+                batchTotal = uris.size,
+                batchIndex = 0,
+                batchDone = 0,
+                batchSkipped = 0,
+                batchFailed = 0,
+                batchSavedBytes = 0L,
+                batchFinished = false
+            )
+        }
+        batchJob = viewModelScope.launch(Dispatchers.Main) {
+            for ((index, uri) in uris.withIndex()) {
+                if (batchCancelled) break
+                _uiState.update {
+                    it.copy(
+                        batchIndex = index + 1,
+                        progress = 0f,
+                        selectedUri = null,
+                        compressedUri = null,
+                        error = null,
+                        saveSuccess = false,
+                        durationMs = 0L
+                    )
+                }
+                updateSelectedUri(context, uri).join()
+                val loaded = _uiState.value
+                if (loaded.selectedUri == null || loaded.durationMs <= 0L) {
+                    _uiState.update { it.copy(batchFailed = it.batchFailed + 1) }
+                    continue
+                }
+                when (mode) {
+                    "BEST" -> applyPreset(QualityPreset.HIGH)
+                    "MEDIUM" -> applyPreset(QualityPreset.MEDIUM)
+                    "SMALL" -> applyPreset(QualityPreset.LOW)
+                    else -> {
+                        val sizeMb = loaded.originalSize / (1024f * 1024f)
+                        if (sizeMb <= WHATSAPP_ULTRA_TARGET_MB) {
+                            _uiState.update { it.copy(batchSkipped = it.batchSkipped + 1) }
+                            continue
+                        }
+                        applyWhatsAppUltra()
+                    }
+                }
+                startCompression(context).join()
+                _uiState.first {
+                    batchCancelled || (!it.isCompressing && (it.compressedUri != null || it.error != null))
+                }
+                if (batchCancelled) break
+                val result = _uiState.value
+                if (result.compressedUri == null) {
+                    _uiState.update { it.copy(batchFailed = it.batchFailed + 1) }
+                    continue
+                }
+                val autoSaved = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && result.autoSaveToPhotos
+                if (!autoSaved) saveCompressedOutput(context)
+                val saved = withTimeoutOrNull(120_000L) { _uiState.first { it.saveSuccess } }
+                if (saved == null) {
+                    _uiState.update { it.copy(batchFailed = it.batchFailed + 1) }
+                    continue
+                }
+                val gained = (result.originalSize - result.compressedSize).coerceAtLeast(0L)
+                _uiState.update {
+                    it.copy(batchDone = it.batchDone + 1, batchSavedBytes = it.batchSavedBytes + gained)
+                }
+            }
+            if (!batchCancelled) {
+                _uiState.update { it.copy(batchFinished = true) }
+            }
+        }
+    }
+
+    fun cancelBatch() {
+        batchCancelled = true
+        batchJob?.cancel()
+        cancelCompression()
+        endBatch()
+    }
+
+    /** Leave the batch screen and go back to the video library. */
+    fun endBatch() {
+        batchJob = null
+        _uiState.update {
+            it.copy(
+                batchTotal = 0,
+                batchIndex = 0,
+                batchDone = 0,
+                batchSkipped = 0,
+                batchFailed = 0,
+                batchSavedBytes = 0L,
+                batchFinished = false
+            )
+        }
+        reset()
     }
 
     /** Keep only part of the video: start at [startMs] and keep [lengthMs] (0 = until the end). */

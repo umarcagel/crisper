@@ -62,6 +62,7 @@ import compress.joshattic.us.ui.screens.CompressionFailedScreen
 import compress.joshattic.us.ui.screens.CompressingScreen
 import compress.joshattic.us.ui.screens.ConfigScreen
 import compress.joshattic.us.ui.screens.LibraryScreen
+import compress.joshattic.us.ui.screens.BatchScreen
 import compress.joshattic.us.ui.screens.ResultScreen
 import compress.joshattic.us.ui.screens.settings.AboutScreen
 import compress.joshattic.us.ui.screens.settings.DisplaySettingsScreen
@@ -237,12 +238,13 @@ fun CompressorApp(viewModel: CompressorViewModel) {
     ) {
         AnimatedContent(
             targetState = when {
+                state.batchTotal > 0 -> "batch"
                 state.isCompressing -> "compressing"
                 currentSettingsDestination != null -> "settings"
                 else -> "main"
             },
             transitionSpec = {
-                if (targetState == "settings" || targetState == "compressing") {
+                if (targetState == "settings" || targetState == "compressing" || targetState == "batch") {
                     slideInVertically { h -> h } + fadeIn() togetherWith fadeOut()
                 } else {
                     fadeIn() togetherWith slideOutVertically { h -> h }
@@ -251,6 +253,13 @@ fun CompressorApp(viewModel: CompressorViewModel) {
             label = "TopLevelContent"
         ) { destination ->
             when (destination) {
+                "batch" -> {
+                    BatchScreen(
+                        state = state,
+                        onCancel = { viewModel.cancelBatch() },
+                        onDone = { viewModel.endBatch() }
+                    )
+                }
                 "compressing" -> {
                     CompressingScreen(state = state, onCancel = { viewModel.cancelCompression() })
                 }
@@ -389,6 +398,7 @@ fun CompressorApp(viewModel: CompressorViewModel) {
                                         totalSaved = state.formattedTotalSaved,
                                         showStorageSaved = state.showStorageSaved,
                                         onVideoSelected = { uri -> viewModel.updateSelectedUri(context, uri) },
+                                        onStartBatch = { uris, mode -> viewModel.startBatch(context, uris, mode) },
                                         onPickWithPicker = {
                                             when (state.videoPickerMode) {
                                                 VideoPickerMode.PHOTO_PICKER -> {

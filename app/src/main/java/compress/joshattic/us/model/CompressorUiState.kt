@@ -51,6 +51,13 @@ data class CompressorUiState(
     val errorLog: String? = null,
     val saveSuccess: Boolean = false,
     val isSaving: Boolean = false,
+    val batchTotal: Int = 0, // 0 means no batch is running
+    val batchIndex: Int = 0,
+    val batchDone: Int = 0,
+    val batchSkipped: Int = 0,
+    val batchFailed: Int = 0,
+    val batchSavedBytes: Long = 0L,
+    val batchFinished: Boolean = false,
     val isOriginalDeleted: Boolean = false,
     val isDeletingOriginal: Boolean = false,
     val deleteOriginalError: String? = null,

@@ -14,7 +14,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +34,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.SwapVert
@@ -42,6 +46,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -208,11 +213,13 @@ private fun VideoThumb(video: LibraryVideo, modifier: Modifier = Modifier) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LibraryScreen(
     totalSaved: String,
     showStorageSaved: Boolean,
     onVideoSelected: (Uri) -> Unit,
+    onStartBatch: (List<Uri>, String) -> Unit,
     onPickWithPicker: () -> Unit
 ) {
     val context = LocalContext.current
@@ -232,7 +239,11 @@ fun LibraryScreen(
     var sort by remember { mutableStateOf(LibrarySort.NEWEST) }
     var columns by remember { mutableIntStateOf(3) }
     var sortMenuOpen by remember { mutableStateOf(false) }
+    var selectedIds by remember { mutableStateOf(setOf<Long>()) }
+    var batchMode by remember { mutableStateOf("MEDIUM") }
+    val selecting = selectedIds.isNotEmpty()
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(modifier = Modifier.fillMaxSize()) {
         if (showStorageSaved && totalSaved.isNotBlank()) {
             Text(
@@ -336,7 +347,7 @@ fun LibraryScreen(
                 } else {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(columns),
-                        contentPadding = PaddingValues(12.dp),
+                        contentPadding = PaddingValues(start = 12.dp, top = 12.dp, end = 12.dp, bottom = if (selecting) 190.dp else 12.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxSize()
@@ -346,9 +357,33 @@ fun LibraryScreen(
                                 modifier = Modifier
                                     .aspectRatio(1f)
                                     .clip(RoundedCornerShape(12.dp))
-                                    .clickable { onVideoSelected(video.uri) }
+                                    .combinedClickable(
+                                        onClick = {
+                                            if (selecting) {
+                                                selectedIds = if (selectedIds.contains(video.id)) selectedIds - video.id else selectedIds + video.id
+                                            } else {
+                                                onVideoSelected(video.uri)
+                                            }
+                                        },
+                                        onLongClick = { selectedIds = selectedIds + video.id }
+                                    )
                             ) {
                                 VideoThumb(video, Modifier.fillMaxSize())
+                                if (selectedIds.contains(video.id)) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
+                                    )
+                                    Icon(
+                                        Icons.Filled.CheckCircle,
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .padding(6.dp)
+                                    )
+                                }
                                 Text(
                                     text = formatSize(video.sizeBytes) + " · " + formatDuration(video.durationMs),
                                     color = Color.White,
@@ -368,5 +403,52 @@ fun LibraryScreen(
                 }
             }
         }
+    }
+    if (selecting) {
+        Surface(
+            tonalElevation = 6.dp,
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "${selectedIds.size} selected",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    TextButton(onClick = { selectedIds = emptySet() }) { Text("Clear") }
+                }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                ) {
+                    listOf("BEST" to "Best", "MEDIUM" to "Medium", "SMALL" to "Small", "ULTRA" to "Ultra").forEach { (key, label) ->
+                        FilterChip(
+                            selected = batchMode == key,
+                            onClick = { batchMode = key },
+                            label = { Text(label) }
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = {
+                        val chosen = (videos ?: emptyList()).filter { selectedIds.contains(it.id) }.map { it.uri }
+                        selectedIds = emptySet()
+                        onStartBatch(chosen, batchMode)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Compress " + selectedIds.size + " videos")
+                }
+            }
+        }
+    }
     }
 }
