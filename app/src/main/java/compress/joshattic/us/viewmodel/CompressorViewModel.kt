@@ -2285,6 +2285,92 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    fun extractAudio(context: Context) {
+        val st = _uiState.value
+        val inputUri = st.selectedUri ?: return
+        if (st.audioExtracting) return
+        val app = getApplication<Application>()
+        _uiState.update { it.copy(audioExtracting = true, audioExtractMessage = app.getString(R.string.audio_extract_working)) }
+
+        fun finish(msg: String) {
+            _uiState.update { it.copy(audioExtracting = false, audioExtractMessage = msg) }
+        }
+
+        val outFile = File(app.cacheDir, "audio_${System.currentTimeMillis()}.mp4")
+        val itemBuilder = MediaItem.Builder().setUri(inputUri)
+        if (st.trimStartMs > 0L || st.trimLengthMs > 0L) {
+            itemBuilder.setClippingConfiguration(
+                MediaItem.ClippingConfiguration.Builder()
+                    .setStartPositionMs(st.trimStartMs)
+                    .setEndPositionMs(st.trimStartMs + st.effectiveDurationMs)
+                    .build()
+            )
+        }
+        val edited = EditedMediaItem.Builder(itemBuilder.build()).setRemoveVideo(true).build()
+        val composition = Composition.Builder(
+            listOf(EditedMediaItemSequence.withAudioFrom(listOf(edited)))
+        ).build()
+
+        try {
+            Transformer.Builder(context)
+                .setAudioMimeType(MimeTypes.AUDIO_AAC)
+                .addListener(object : Transformer.Listener {
+                    override fun onCompleted(composition: Composition, exportResult: ExportResult) {
+                        viewModelScope.launch(Dispatchers.IO) {
+                            val msg = try {
+                                saveAudioToMusic(context, outFile, st)
+                                app.getString(R.string.audio_extract_done)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                app.getString(R.string.audio_extract_failed)
+                            } finally {
+                                outFile.delete()
+                            }
+                            finish(msg)
+                        }
+                    }
+
+                    override fun onError(composition: Composition, exportResult: ExportResult, exportException: ExportException) {
+                        exportException.printStackTrace()
+                        outFile.delete()
+                        finish(app.getString(R.string.audio_extract_failed))
+                    }
+                })
+                .build()
+                .start(composition, outFile.absolutePath)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            finish(app.getString(R.string.audio_extract_failed))
+        }
+    }
+
+    private fun saveAudioToMusic(context: Context, file: File, st: CompressorUiState) {
+        val stem = compressedOutputFileName(st).removeSuffix(".mp4")
+        val values = ContentValues().apply {
+            put(MediaStore.Audio.Media.DISPLAY_NAME, "$stem.m4a")
+            put(MediaStore.Audio.Media.MIME_TYPE, "audio/mp4")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(MediaStore.Audio.Media.IS_PENDING, 1)
+                put(MediaStore.Audio.Media.RELATIVE_PATH, Environment.DIRECTORY_MUSIC + "/Crisper")
+            }
+        }
+        val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        } else {
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        }
+        val itemUri = context.contentResolver.insert(collection, values)
+            ?: throw IllegalStateException("No audio entry")
+        context.contentResolver.openOutputStream(itemUri).use { out ->
+            file.inputStream().use { it.copyTo(out!!, COPY_BUFFER_BYTES) }
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            values.clear()
+            values.put(MediaStore.Audio.Media.IS_PENDING, 0)
+            context.contentResolver.update(itemUri, values, null, null)
+        }
+    }
+
     private fun originalDateMillis(context: Context, uri: Uri?): Long? {
         if (uri == null) return null
         return try {

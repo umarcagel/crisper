@@ -308,5 +308,21 @@ fun PresetsTab(state: CompressorUiState, viewModel: CompressorViewModel) {
                 }
             }
         }
+
+        androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 24.dp))
+        val audioContext = androidx.compose.ui.platform.LocalContext.current
+        androidx.compose.material3.OutlinedButton(
+            onClick = { viewModel.extractAudio(audioContext) },
+            enabled = !state.audioExtracting && state.selectedUri != null,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(R.string.audio_extract_button))
+        }
+        Text(
+            state.audioExtractMessage ?: stringResource(R.string.audio_extract_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 6.dp)
+        )
     }
 }

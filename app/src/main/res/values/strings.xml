@@ -332,4 +332,9 @@
     <string name="notification_channel_name">Compression progress</string>
     <string name="notification_title_default">Compressing video</string>
     <string name="notification_text">%1$d%% done · tap to open Crisper</string>
+    <string name="audio_extract_button">Save audio only (M4A)</string>
+    <string name="audio_extract_hint">Turns this video into a sound file. Uses your trim if you set one.</string>
+    <string name="audio_extract_working">Extracting audio…</string>
+    <string name="audio_extract_done">Saved to Music/Crisper</string>
+    <string name="audio_extract_failed">Could not extract audio from this video</string>
 </resources>

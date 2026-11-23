@@ -38,6 +38,8 @@ data class CompressorUiState(
     val originalFps: Float = 30f,
     val originalVideoMime: String? = null,
     val durationMs: Long = 0L,
+    val audioExtracting: Boolean = false,
+    val audioExtractMessage: String? = null,
     val trimStartMs: Long = 0L,
     val trimLengthMs: Long = 0L, // 0 means keep everything after the start
     val originalName: String? = null,
