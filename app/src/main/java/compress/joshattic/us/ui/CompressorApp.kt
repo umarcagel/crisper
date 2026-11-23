@@ -412,6 +412,11 @@ fun CompressorApp(viewModel: CompressorViewModel) {
                                         showStorageSaved = state.showStorageSaved,
                                         onVideoSelected = { uri -> viewModel.updateSelectedUri(context, uri) },
                                         onStartBatch = { uris, mode -> viewModel.startBatch(context, uris, mode) },
+                                        onMerge = { uris -> viewModel.mergeVideos(context, uris) },
+                                        merging = state.mergeRunning,
+                                        mergeProgress = state.mergeProgress,
+                                        mergeError = state.mergeError,
+                                        onMergeDismiss = { viewModel.dismissMergeError() },
                                         onPickWithPicker = {
                                             when (state.videoPickerMode) {
                                                 VideoPickerMode.PHOTO_PICKER -> {

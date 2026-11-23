@@ -343,4 +343,6 @@
     <string name="player_close">Close</string>
     <string name="player_play_original">Play video</string>
     <string name="player_play_compressed">Play compressed video</string>
+    <string name="merge_working">Joining your videos…</string>
+    <string name="merge_failed">Could not join these videos</string>
 </resources>

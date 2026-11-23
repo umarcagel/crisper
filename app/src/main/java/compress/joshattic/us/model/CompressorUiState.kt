@@ -41,6 +41,9 @@ data class CompressorUiState(
     val audioExtracting: Boolean = false,
     val audioExtractMessage: String? = null,
     val cropRatio: Float = 0f, // 0 = no crop, otherwise width / height of the kept area
+    val mergeRunning: Boolean = false,
+    val mergeProgress: Float = 0f,
+    val mergeError: String? = null,
     val trimStartMs: Long = 0L,
     val trimLengthMs: Long = 0L, // 0 means keep everything after the start
     val originalName: String? = null,

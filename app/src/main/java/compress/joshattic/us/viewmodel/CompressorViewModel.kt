@@ -2306,6 +2306,102 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    fun dismissMergeError() {
+        _uiState.update { it.copy(mergeError = null) }
+    }
+
+    fun mergeVideos(context: Context, uris: List<Uri>) {
+        if (uris.size < 2 || _uiState.value.mergeRunning) return
+        val app = getApplication<Application>()
+        _uiState.update { it.copy(mergeRunning = true, mergeProgress = 0f, mergeError = null) }
+
+        viewModelScope.launch {
+            try {
+                // Use the first clip's size and quality for the joined video so nothing is stretched or degraded
+                var w = 0
+                var h = 0
+                var bitrate = 0
+                withContext(Dispatchers.IO) {
+                    val r = android.media.MediaMetadataRetriever()
+                    try {
+                        r.setDataSource(context, uris.first())
+                        w = r.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull() ?: 0
+                        h = r.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull() ?: 0
+                        val rot = r.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toIntOrNull() ?: 0
+                        if (rot == 90 || rot == 270) { val t = w; w = h; h = t }
+                        bitrate = r.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_BITRATE)?.toIntOrNull() ?: 0
+                    } finally {
+                        r.release()
+                    }
+                }
+                if (w % 2 != 0) w -= 1
+                if (h % 2 != 0) h -= 1
+                if (w <= 0 || h <= 0) throw IllegalStateException("Unknown video size")
+                val targetBitrate = (if (bitrate > 0) bitrate.toLong() * 6 / 5 else 12_000_000L)
+                    .coerceIn(4_000_000L, 40_000_000L).toInt()
+
+                val items = uris.map { u ->
+                    EditedMediaItem.Builder(MediaItem.fromUri(u))
+                        .setEffects(
+                            Effects(
+                                emptyList(),
+                                listOf<Effect>(Presentation.createForWidthAndHeight(w, h, Presentation.LAYOUT_SCALE_TO_FIT))
+                            )
+                        )
+                        .build()
+                }
+                val dir = File(app.cacheDir, "merged").apply { mkdirs() }
+                dir.listFiles()?.forEach { it.delete() }
+                val outFile = File(dir, "Merged_${System.currentTimeMillis()}.mp4")
+
+                val encoderFactory = androidx.media3.transformer.DefaultEncoderFactory.Builder(context)
+                    .setRequestedVideoEncoderSettings(
+                        androidx.media3.transformer.VideoEncoderSettings.Builder().setBitrate(targetBitrate).build()
+                    )
+                    .build()
+
+                val transformer = Transformer.Builder(context)
+                    .setVideoMimeType(MimeTypes.VIDEO_H264)
+                    .setAudioMimeType(MimeTypes.AUDIO_AAC)
+                    .setEncoderFactory(encoderFactory)
+                    .addListener(object : Transformer.Listener {
+                        override fun onCompleted(composition: Composition, exportResult: ExportResult) {
+                            val mergedUri = androidx.core.content.FileProvider.getUriForFile(
+                                context, context.packageName + ".provider", outFile
+                            )
+                            _uiState.update { it.copy(mergeRunning = false, mergeProgress = 1f) }
+                            updateSelectedUri(context, mergedUri)
+                        }
+
+                        override fun onError(composition: Composition, exportResult: ExportResult, exportException: ExportException) {
+                            exportException.printStackTrace()
+                            outFile.delete()
+                            _uiState.update {
+                                it.copy(mergeRunning = false, mergeError = app.getString(R.string.merge_failed))
+                            }
+                        }
+                    })
+                    .build()
+
+                val composition = Composition.Builder(
+                    listOf(EditedMediaItemSequence.withAudioAndVideoFrom(items))
+                ).build()
+                transformer.start(composition, outFile.absolutePath)
+
+                val holder = androidx.media3.transformer.ProgressHolder()
+                while (_uiState.value.mergeRunning) {
+                    if (transformer.getProgress(holder) != Transformer.PROGRESS_STATE_NOT_STARTED) {
+                        _uiState.update { it.copy(mergeProgress = holder.progress / 100f) }
+                    }
+                    kotlinx.coroutines.delay(300)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _uiState.update { it.copy(mergeRunning = false, mergeError = app.getString(R.string.merge_failed)) }
+            }
+        }
+    }
+
     fun extractAudio(context: Context) {
         val st = _uiState.value
         val inputUri = st.selectedUri ?: return

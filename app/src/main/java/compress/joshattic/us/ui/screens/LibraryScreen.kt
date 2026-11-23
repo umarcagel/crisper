@@ -221,9 +221,35 @@ fun LibraryScreen(
     showStorageSaved: Boolean,
     onVideoSelected: (Uri) -> Unit,
     onStartBatch: (List<Uri>, String) -> Unit,
-    onPickWithPicker: () -> Unit
+    onPickWithPicker: () -> Unit,
+    onMerge: (List<Uri>) -> Unit = {},
+    merging: Boolean = false,
+    mergeProgress: Float = 0f,
+    mergeError: String? = null,
+    onMergeDismiss: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    if (merging) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = {},
+            confirmButton = {},
+            title = { Text("Joining your videos…") },
+            text = {
+                androidx.compose.material3.LinearProgressIndicator(
+                    progress = { mergeProgress.coerceIn(0f, 1f) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        )
+    }
+    if (mergeError != null) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = onMergeDismiss,
+            confirmButton = { TextButton(onClick = onMergeDismiss) { Text("OK") } },
+            title = { Text(mergeError) },
+            text = { Text("Try videos that play normally on your phone.") }
+        )
+    }
     var hasPermission by remember { mutableStateOf(canReadVideos(context)) }
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -467,6 +493,20 @@ fun LibraryScreen(
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
+                if (selectedIds.size >= 2) {
+                    androidx.compose.material3.OutlinedButton(
+                        onClick = {
+                            val all = videos ?: emptyList()
+                            val ordered = selectedIds.mapNotNull { id -> all.firstOrNull { it.id == id }?.uri }
+                            selectedIds = emptySet()
+                            onMerge(ordered)
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Join " + selectedIds.size + " videos into one")
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
                 Button(
                     onClick = {
                         val chosen = (videos ?: emptyList()).filter { selectedIds.contains(it.id) }.map { it.uri }
