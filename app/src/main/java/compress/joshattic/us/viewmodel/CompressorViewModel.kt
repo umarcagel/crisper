@@ -2495,7 +2495,9 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
 
                 val composition = Composition.Builder(
                     listOf(EditedMediaItemSequence.withAudioAndVideoFrom(items))
-                ).build()
+                )
+                    .setHdrMode(Composition.HDR_MODE_TONE_MAP_HDR_TO_SDR_USING_OPEN_GL)
+                    .build()
                 transformer.start(composition, outFile.absolutePath)
 
                 val holder = androidx.media3.transformer.ProgressHolder()
