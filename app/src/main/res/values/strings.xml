@@ -312,7 +312,7 @@
     <string name="ultra_title">Ultra · WhatsApp Status</string>
     <string name="ultra_desc">Sharpest picture that fits under WhatsApp\'s size limit, saved as H.264 so WhatsApp has little reason to squash it again.</string>
     <string name="ultra_small_enough">Already small enough for WhatsApp Status.</string>
-    <string name="ultra_long_note">Status length limits differ between WhatsApp versions (about 30 to 90 seconds). Longer clips may need trimming.</string>
+    <string name="ultra_long_note">WhatsApp Status accepts up to 90 seconds. This clip is longer, so use the 90 s trim button above.</string>
     <string name="trim_title">Trim</string>
     <string name="trim_full">Full video</string>
     <string name="trim_info">Starts at %1$s · clip length %2$s</string>
@@ -349,4 +349,5 @@
     <string name="preview_hint">Compresses a 10-second sample with your current settings so you can check the quality first.</string>
     <string name="smart_title">Smart Quality</string>
     <string name="smart_desc">Picks the size from the picture itself, so the video looks as good as possible. File size follows the quality.</string>
+    <string name="ultra_quality_note">Tip: the shorter the clip, the more detail fits under the size limit.</string>
 </resources>

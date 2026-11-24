@@ -297,7 +297,15 @@ fun PresetsTab(state: CompressorUiState, viewModel: CompressorViewModel) {
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        if (ultraEnabled && state.effectiveDurationMs > 30_000L) {
+                        if (ultraEnabled && state.effectiveDurationMs in 45_001L..90_000L) {
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                stringResource(R.string.ultra_quality_note),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.tertiary
+                            )
+                        }
+                        if (ultraEnabled && state.effectiveDurationMs > 90_000L) {
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
                                 stringResource(R.string.ultra_long_note),
