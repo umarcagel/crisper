@@ -165,6 +165,13 @@ fun CompressorApp(viewModel: CompressorViewModel) {
         }
     }
     
+    state.previewUri?.let { previewUri ->
+        compress.joshattic.us.ui.components.VideoPlayerDialog(
+            uri = previewUri,
+            onDismiss = { viewModel.dismissPreview() }
+        )
+    }
+
     val pickMedia = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
             viewModel.updateSelectedUri(context, uri)

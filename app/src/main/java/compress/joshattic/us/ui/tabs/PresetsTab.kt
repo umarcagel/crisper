@@ -66,6 +66,7 @@ fun PresetsTab(state: CompressorUiState, viewModel: CompressorViewModel) {
         
         var showPlayer by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
         val playUri = state.selectedUri
+        val previewContext = androidx.compose.ui.platform.LocalContext.current
         if (playUri != null) {
             androidx.compose.material3.OutlinedButton(
                 onClick = { showPlayer = true },
@@ -73,6 +74,18 @@ fun PresetsTab(state: CompressorUiState, viewModel: CompressorViewModel) {
             ) {
                 Text(stringResource(R.string.player_play_original))
             }
+            androidx.compose.material3.OutlinedButton(
+                onClick = { viewModel.previewCompress(previewContext) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(R.string.preview_button))
+            }
+            Text(
+                stringResource(R.string.preview_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 6.dp)
+            )
             Spacer(modifier = Modifier.height(16.dp))
             if (showPlayer) {
                 compress.joshattic.us.ui.components.VideoPlayerDialog(uri = playUri, onDismiss = { showPlayer = false })

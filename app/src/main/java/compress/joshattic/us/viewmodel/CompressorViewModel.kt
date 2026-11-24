@@ -1556,10 +1556,48 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
         _uiState.update { it.copy(deleteOriginalError = null) }
     }
     
+    private var previewBackup: Pair<Long, Long>? = null
+
+    private fun CompressorUiState.withPreviewRestored(): CompressorUiState {
+        if (!previewMode) return this
+        val backup = previewBackup
+        previewBackup = null
+        return copy(
+            previewMode = false,
+            trimStartMs = backup?.first ?: trimStartMs,
+            trimLengthMs = backup?.second ?: trimLengthMs
+        )
+    }
+
+    fun dismissPreview() {
+        _uiState.update { it.copy(previewUri = null) }
+    }
+
+    /** Compresses a ~10 second sample from the middle with the current settings, then shows it in the player. */
+    fun previewCompress(context: Context) {
+        val st = _uiState.value
+        if (st.selectedUri == null || st.isCompressing) return
+        previewBackup = st.trimStartMs to st.trimLengthMs
+        val eff = st.effectiveDurationMs
+        _uiState.update {
+            if (eff > 12_000L) {
+                it.copy(
+                    previewMode = true,
+                    previewUri = null,
+                    trimStartMs = st.trimStartMs + (eff - 10_000L) / 2,
+                    trimLengthMs = 10_000L
+                )
+            } else {
+                it.copy(previewMode = true, previewUri = null)
+            }
+        }
+        startCompression(context)
+    }
+
     fun cancelCompression() {
         activeTransformer?.cancel()
         compressionJob?.cancel()
-        _uiState.update { it.copy(isCompressing = false, progress = 0f) }
+        _uiState.update { it.copy(isCompressing = false, progress = 0f).withPreviewRestored() }
     }
     
     private fun clearCache() {
@@ -1783,6 +1821,16 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
             .setEncoderFactory(encoderFactory)
             .addListener(object : Transformer.Listener {
                 override fun onCompleted(composition: Composition, exportResult: ExportResult) {
+                     if (_uiState.value.previewMode) {
+                         _uiState.update {
+                             it.copy(
+                                 isCompressing = false,
+                                 progress = 0f,
+                                 previewUri = Uri.fromFile(outputFile)
+                             ).withPreviewRestored()
+                         }
+                         return
+                     }
                      val finalSize = outputFile.length()
                      val savedBytes = currentState.originalSize - finalSize
                      var newTotal = _uiState.value.totalSavedBytes
@@ -1849,7 +1897,7 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
                             isCompressing = false, 
                             error = errorMsg,
                             errorLog = errorLog
-                        ) 
+                        ).withPreviewRestored()
                     }
                 }
             })
