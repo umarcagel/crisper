@@ -46,6 +46,7 @@ data class CompressorUiState(
     val mergeError: String? = null,
     val previewMode: Boolean = false,
     val previewUri: android.net.Uri? = null,
+    val smartQualitySizeMb: Float = 0f,
     val trimStartMs: Long = 0L,
     val trimLengthMs: Long = 0L, // 0 means keep everything after the start
     val originalName: String? = null,

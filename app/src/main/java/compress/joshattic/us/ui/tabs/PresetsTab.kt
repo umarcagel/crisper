@@ -313,6 +313,50 @@ fun PresetsTab(state: CompressorUiState, viewModel: CompressorViewModel) {
             }
         }
 
+        run {
+            val smartSelected = state.smartQualitySizeMb > 0f &&
+                state.activePreset == QualityPreset.CUSTOM &&
+                kotlin.math.abs(state.targetSizeMb - state.smartQualitySizeMb) < 0.05f
+            OutlinedCard(
+                onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    viewModel.applySmartQuality()
+                },
+                shape = RoundedCornerShape(24.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                colors = if (smartSelected) {
+                    CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                } else {
+                    CardDefaults.outlinedCardColors(containerColor = Color.Transparent)
+                },
+                border = if (smartSelected) BorderStroke(0.dp, Color.Transparent) else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            stringResource(R.string.smart_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            stringResource(R.string.smart_desc),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    if (smartSelected) {
+                        Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
+                    }
+                }
+            }
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
 
         val sizePresets = state.targetSizePresets.filter { preset -> 

@@ -347,4 +347,6 @@
     <string name="merge_failed">Could not join these videos</string>
     <string name="preview_button">Preview 10 seconds</string>
     <string name="preview_hint">Compresses a 10-second sample with your current settings so you can check the quality first.</string>
+    <string name="smart_title">Smart Quality</string>
+    <string name="smart_desc">Picks the size from the picture itself, so the video looks as good as possible. File size follows the quality.</string>
 </resources>

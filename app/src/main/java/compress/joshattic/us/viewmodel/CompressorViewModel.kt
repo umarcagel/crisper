@@ -1118,6 +1118,37 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
      * Ultra mode for WhatsApp Status: H.264 (the codec WhatsApp expects) with the sharpest
      * picture that still fits just under WhatsApp's size cap.
      */
+    /**
+     * Quality first: chooses the video bitrate from the number of pixels per second (a standard
+     * "bits per pixel" rule), never above the original, and lets the file size follow.
+     */
+    fun applySmartQuality() {
+        _uiState.update { cur ->
+            val w = cur.originalWidth
+            val h = cur.originalHeight
+            val durationSec = cur.effectiveDurationMs / 1000.0
+            if (w <= 0 || h <= 0 || durationSec <= 0.0) return@update cur
+            val fps = if (cur.originalFps > 0f) minOf(cur.originalFps, 60f) else 30f
+            val bpp = if (cur.videoCodec == MimeTypes.VIDEO_H265) 0.07 else 0.10
+            var videoBps = w.toDouble() * h * fps * bpp
+            if (cur.originalBitrate > 0) {
+                videoBps = minOf(videoBps, cur.originalBitrate * 0.85)
+            }
+            val audioBps = 128_000.0
+            val totalBits = (videoBps + audioBps) * durationSec
+            val sizeMb = (totalBits / (8.0 * 1024 * 1024 * 0.96)).toFloat().coerceAtLeast(0.5f)
+            cur.copy(
+                targetSizeMb = sizeMb,
+                smartQualitySizeMb = sizeMb,
+                activePreset = QualityPreset.CUSTOM,
+                targetResolutionLocked = false,
+                targetFpsLocked = false,
+                audioBitrateLocked = false,
+                removeAudio = false
+            ).autoAdjust(sizeMb)
+        }
+    }
+
     fun applyWhatsAppUltra() {
         _uiState.update { current ->
             val codec = MimeTypes.VIDEO_H264
