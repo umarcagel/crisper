@@ -493,7 +493,7 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
                     originalFps = fps,
                     originalVideoMime = videoMime,
                     durationMs = duration,
-                    trimStartMs = 0L, cropRatio = 0f,
+                    trimStartMs = 0L, cropRatio = 0f, rotationDegrees = 0, flipHorizontal = false, grayscale = false,
                     trimLengthMs = 0L,
                     originalName = originalName,
                     targetSizeMb = defaultTargetMb,
@@ -1272,6 +1272,18 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     /** Keep only part of the video: start at [startMs] and keep [lengthMs] (0 = until the end). */
+    fun rotateVideo() {
+        _uiState.update { it.copy(rotationDegrees = (it.rotationDegrees + 90) % 360) }
+    }
+
+    fun toggleFlip() {
+        _uiState.update { it.copy(flipHorizontal = !it.flipHorizontal) }
+    }
+
+    fun toggleGrayscale() {
+        _uiState.update { it.copy(grayscale = !it.grayscale) }
+    }
+
     fun setCropRatio(ratio: Float) {
         _uiState.update { it.copy(cropRatio = ratio) }
     }
@@ -1669,7 +1681,7 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
                 originalFps = 30f,
                 originalVideoMime = null,
                 durationMs = 0L,
-                trimStartMs = 0L, cropRatio = 0f,
+                trimStartMs = 0L, cropRatio = 0f, rotationDegrees = 0, flipHorizontal = false, grayscale = false,
                 trimLengthMs = 0L,
                 originalName = null,
                 isCompressing = false,
@@ -1967,6 +1979,25 @@ class CompressorViewModel(application: Application) : AndroidViewModel(applicati
               if (width > 0 && height > 0) {
                   effectsList.add(Presentation.createForWidthAndHeight(width, height, Presentation.LAYOUT_SCALE_TO_FIT))
               }
+        }
+
+        if (currentState.rotationDegrees != 0 || currentState.flipHorizontal) {
+            effectsList.add(
+                androidx.media3.effect.ScaleAndRotateTransformation.Builder()
+                    .setRotationDegrees(currentState.rotationDegrees.toFloat())
+                    .setScale(if (currentState.flipHorizontal) -1f else 1f, 1f)
+                    .build()
+            )
+        }
+        if (currentState.grayscale) {
+            effectsList.add(object : androidx.media3.effect.RgbMatrix {
+                override fun getMatrix(presentationTimeUs: Long, useHdr: Boolean): FloatArray = floatArrayOf(
+                    0.299f, 0.299f, 0.299f, 0f,
+                    0.587f, 0.587f, 0.587f, 0f,
+                    0.114f, 0.114f, 0.114f, 0f,
+                    0f, 0f, 0f, 1f
+                )
+            })
         }
 
         val mediaItemBuilder = MediaItem.Builder().setUri(inputUri)

@@ -47,6 +47,9 @@ data class CompressorUiState(
     val previewMode: Boolean = false,
     val previewUri: android.net.Uri? = null,
     val smartQualitySizeMb: Float = 0f,
+    val rotationDegrees: Int = 0,
+    val flipHorizontal: Boolean = false,
+    val grayscale: Boolean = false,
     val trimStartMs: Long = 0L,
     val trimLengthMs: Long = 0L, // 0 means keep everything after the start
     val originalName: String? = null,

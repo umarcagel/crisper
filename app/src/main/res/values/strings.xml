@@ -350,4 +350,8 @@
     <string name="smart_title">Smart Quality</string>
     <string name="smart_desc">Picks the size from the picture itself, so the video looks as good as possible. File size follows the quality.</string>
     <string name="ultra_quality_note">Tip: the shorter the clip, the more detail fits under the size limit.</string>
+    <string name="adjust_title">Rotate, flip and colour</string>
+    <string name="adjust_rotate">Rotate</string>
+    <string name="adjust_flip">Flip</string>
+    <string name="adjust_gray">Black and white</string>
 </resources>

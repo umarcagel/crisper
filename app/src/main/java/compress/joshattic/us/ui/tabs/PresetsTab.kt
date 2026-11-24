@@ -124,6 +124,45 @@ fun PresetsTab(state: CompressorUiState, viewModel: CompressorViewModel) {
             modifier = Modifier.padding(top = 6.dp, bottom = 20.dp)
         )
 
+        Text(
+            stringResource(R.string.adjust_title),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            FilterChip(
+                selected = state.rotationDegrees != 0,
+                onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    viewModel.rotateVideo()
+                },
+                label = { Text(stringResource(R.string.adjust_rotate) + if (state.rotationDegrees != 0) " " + state.rotationDegrees + "°" else "") }
+            )
+            FilterChip(
+                selected = state.flipHorizontal,
+                onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    viewModel.toggleFlip()
+                },
+                label = { Text(stringResource(R.string.adjust_flip)) }
+            )
+            FilterChip(
+                selected = state.grayscale,
+                onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    viewModel.toggleGrayscale()
+                },
+                label = { Text(stringResource(R.string.adjust_gray)) }
+            )
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+
         if (state.durationMs > 5_000L) {
             Text(
                 stringResource(R.string.trim_title),
